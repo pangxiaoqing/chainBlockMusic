@@ -1,0 +1,145 @@
+﻿
+		<div>
+			<h4 class="navtitle">
+				<span class="navtop1">购买记录</span>
+				<button class="btn btn-default btnWider" type="button" id="BuyBtn">购买</button>
+			</h4>
+			<div class="row marginv0"><!--col-lg-3 col-xs-3 col-md-3-->
+				<div class="pull-right">
+					<button class="btn btn-default btnWider" type="button">搜索</button>
+				</div>
+				<div class=" col-xs-4 pull-right">
+					<input type="text" class="form-control" id="" placeholder="歌曲名">
+				</div>
+			</div>
+			<div class="tablewrap">
+				<table class="table" border="0" cellspacing="0" cellpadding="0">
+				<tbody id="pTable">
+					<tr>
+						<th>歌曲名</th>
+						<th>歌曲作者</th>
+						<th>购买时间</th>
+						<th>购买类型</th>
+						<th colspan="3">操作</th>
+					</tr>
+				</tbody>
+				</table>
+			</div>
+		</div>
+		
+		
+		
+<!--购买版权弹框-->
+  <div class="modal fade pmodal" tabindex="-1" id="buyCopy" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h3 class="modal-title index_pay">支付提示</h3>
+        </div>
+        <div class="modal-body index_pad">
+          <h3 class="index_pay_style">您需要支付150元购买费用，我们将从您的账户中扣除！</h3>
+		    	<p class="index_line32">账户余额：300元</p>
+		    	<p class="index_line32">支付密码：<input type="password" placeholder="输入支付密码"/></p> 
+        </div>
+        <div class="modal-footer index_txt_center">
+          <button type="button" class="btn btn-danger"  data-toggle="modal" data-target='#buySure' data-dismiss="modal">确认支付</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!--购买版权-确认支付弹框-->
+  <div class="modal fade pmodal" tabindex="-1" id="buySure" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h3 class="modal-title index_pay">支付完成</h3>
+        </div>
+        <div class="modal-body index_pad">
+          <h3 class="index_pay_style">支付成功！</h3>
+        </div>
+        <div class="modal-footer index_txt_center">
+          <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+	<!--点击播放弹框-->
+  <div class="modal fade pmodal" tabindex="-1" id="buySure2" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h3 class="modal-title index_pay">支付完成</h3>
+        </div>
+        <div class="modal-body index_pad">
+          <h3 class="index_pay_style">支付成功！</h3>
+        </div>
+        <div class="modal-footer index_txt_center">
+          <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+ <script type="text/javascript" src="../js/controller/generateStringByTemplate.js"></script>
+<!--  购买记录页面每一条数据的模板 -->
+<script type="text/template" id="songs_list">
+	<tr>
+		<td>%s</td>
+		<td>%n</td>
+		<td>2016-03-02 12:00</td>
+		<td>播放</td>
+		<td><button type="button" class="btn btnModify" data-toggle="modal" data-target='#buySure2'>播放</button></td>
+		<td><button type="button" class="btn btnModify" data-toggle="modal" data-target='#buyCopy'>购买版权</button></td>
+		<td><a class="pr_color" href="broadcastPage.html?title=%s&&artist=%n" target="_blank">查看</a></td>
+	</tr>
+</script>
+<script>
+/*购买记录页面的歌曲名，歌曲作者等等的数据*/
+;!function(){
+	$.ajax({
+		url:"/songsList",
+		type:"POST",
+		timeout:300000,
+		success:function(res){
+			/*筛选不为空的显示*/
+			var _arr = [],
+			     data = res.data;//是个对象数组，用for循环
+			for(var i=0,len=data.length;i<len;i++){
+				var ele = data[i];//是对象
+				if(ele.title&&ele.artist){
+					_arr.push(data[i])
+				}
+			}
+			$("#pTable").append(
+				generateStringByTemplate({
+			            id:"songs_list",
+			            params:{"%s":"title","%n":"artist"},
+			            data:_arr
+			          })
+			)
+		}
+	})
+}()
+
+  /*已购歌曲点击调转页面至购买记录*/
+	$("#indexBuyMusic").click(function(){
+		$(".modal-backdrop").hide();
+		$(".index_buy_record").addClass('active').siblings().removeClass('active');
+		$('#pageCon').load("purchaseRecord.html");
+	});
+	/*购买确认支付*/
+	$("#indexBuySure").click(function(){
+		setTimeout(function(){
+//			window.location.href = "broadcastPage.html";
+			window.open("broadcastPage.html");
+		},1000);
+	});
+/*	点击购买按钮跳转到发现歌曲页面*/
+	$("#BuyBtn").click(function(){
+		$(".index_find_music").addClass('active').siblings().removeClass('active');
+		$('#pageCon').load("findMusic.html");
+	});
+</script>

@@ -1,0 +1,133 @@
+<div class="accountCenter">
+  <h3>账户基本信息</h3>
+  <div class="accountInformation">
+  	<div class="row">
+	    <div class=" col-md-3 col-sm-6 col-xs-6">
+	    	<div class="accInformation accInformation1">
+	    	<p class="fontStyle">300.00元</p>
+	    	<p class="fontColor">账户余额</p>
+	    	<p class="fontBlue"><a href="accountDetails.html" target="_blank">查看明细</a></p>
+	    	</div>
+	    </div>
+	    <div class=" col-md-3 col-sm-6 col-xs-6">
+	    	<div class="accInformation">
+	    	<p class="fontStyle">10次</p>
+	    	<p class="fontColor">已购播放次数</p>
+	    	</div>
+	    </div>
+	    <div class=" col-md-3 col-sm-6 col-xs-6">
+	    	<div class="accInformation">
+	    	<p class="fontStyle">10首</p>
+	    	<p class="fontColor">已购买版权歌曲</p>
+	    	</div>
+	    </div>
+	    <div class=" col-md-3 col-sm-6 col-xs-6">
+	    	<div class="accInformation">
+	    	<p class="fontStyle">10首</p>
+	    	<p class="fontColor">已认证歌曲</p>
+	    	</div>
+	    </div>
+	</div>
+  </div>    
+  <div class="row">
+  	<div class="col-md-6 col-sm-12">
+	    <h3>购买歌曲列表</h3>
+	    <div class="table_border">
+		<table class="table  table-condensed">
+		  <!--<caption>购买歌曲列表</caption>-->
+		  <thead>
+		    <tr>
+		      <th>歌曲名</th>
+		      <th>作者</th>
+		      <th>购买时间</th>
+		      <th>购买类型</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+		    <tr>
+		      <td>十年</td>
+		      <td>陈奕迅</td>
+		      <td>2017-4-9</td>
+		      <td>版权</td>
+		    </tr>
+		   <tr>
+		      <td>十年</td>
+		      <td>陈奕迅</td>
+		      <td>2017-4-9</td>
+		      <td>版权</td>
+		    </tr>
+		    <tr>
+		      <td>十年</td>
+		      <td>陈奕迅</td>
+		      <td>2017-4-9</td>
+		      <td>版权</td>
+		    </tr>
+		    <tr>
+		      <td>十年</td>
+		      <td>陈奕迅</td>
+		      <td>2017-4-9</td>
+		      <td>版权</td>
+		    </tr>
+		  </tbody>
+		</table>
+		<p class="fontBlue"><a href="javascript:;" id="buyRecord">更多</a></p>
+		</div>
+    </div>
+    <div class="col-md-6 col-sm-12">
+      	<h3>认证歌曲列表</h3>
+      	<div class="table_border">
+		<table class="table  table-condensed">
+		  <!--<caption>购买歌曲列表</caption>-->
+		  <thead>
+		    <tr>
+		      <th>歌曲名</th>
+		      <th>认证时间</th>
+		      <th>播放次数</th>
+		      <th>购买版权次数</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+		    <tr>
+		      <td>十年</td>
+		      <td>2017-4-9</td>
+		      <td>100</td>
+		      <td>10</td>
+		    </tr>
+		    <tr>
+		      <td>十年</td>
+		      <td>2017-4-9</td>
+		      <td>100</td>
+		      <td>10</td>
+		    </tr>
+		     <tr>
+		      <td>十年</td>
+		      <td>2017-4-9</td>
+		      <td>100</td>
+		      <td>10</td>
+		    </tr>
+		     <tr>
+		      <td>十年</td>
+		      <td>2017-4-9</td>
+		      <td>100</td>
+		      <td>10</td>
+		    </tr>
+		  </tbody>
+		</table>
+		<p class="fontBlue"><a href="javascript:;" id="ApproveMusic">更多>></a></p>
+		</div>
+  	</div>
+  </div>
+ 
+</div>
+<script>
+	/*账户中心的购买歌曲列表的更多点击*/
+	$("#buyRecord").click(function(){
+		$(".index_buy_record").addClass('active').siblings().removeClass('active');
+		$('#pageCon').load("purchaseRecord.html");
+	})
+	/*账户中心的认证歌曲列表的更多点击*/
+	$("#ApproveMusic").click(function(){
+		$(".index_approve_music").addClass('active').siblings().removeClass('active');
+		$('#pageCon').load("authSongs.html");
+	})
+</script>

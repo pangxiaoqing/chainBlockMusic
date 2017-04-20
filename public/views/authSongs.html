@@ -1,0 +1,218 @@
+﻿
+		<div>
+			<h4 class="navtitle">
+				<span class="navtop1">认证歌曲数量：<span>10</span>首</span>
+				<!--<button class="btn btn-default btnWider" type="button">认证</button>-->
+				<button type="button" id="identify" class="btn btn-primary btnWider" data-toggle="modal" data-target='#myModal1'>认证</button>
+			</h4>
+			<div class="row marginv0"><!--col-lg-3 col-xs-3 col-md-3-->
+				<div class="pull-right">
+					<button class="btn btn-default btnWider" type="button">搜索</button>
+				</div>
+				<div class=" col-xs-4 pull-right">
+					<input type="text" class="form-control" id="" placeholder="歌曲名">
+				</div>
+			</div>
+			<div class="tablewrap">
+				<table class="table" border="0" cellspacing="0" cellpadding="0">
+                            <tbody id="pTable">
+					<tr>
+						<th>歌曲名</th>
+						<th>歌曲作者</th>
+						<th>认证时间</th>
+						<th>播放次数</th>
+						<th>购买版权次数</th>
+						<th>操作</th>
+					</tr>
+                            </tbody>
+				</table>
+			</div>
+		</div>
+		<!--认证点击弹窗部分-->
+		<div class="modal fade htapWin" tabindex="-1" id="myModal1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h3 class="modal-title">认证歌曲</h3>
+            </div>
+            <div class="progressInfo">
+            	<img src="../images/baseInfo.png" alt="" />
+            </div>
+            <div class="modal-body">
+              <div class="modal-box">
+                 <div class="row">
+                   <div class="col-md-6">
+                     <p>歌曲名称 <input id="musicName" type="text" placeholder="请输入歌曲名" /></p>
+                     <p>歌曲文件 <input id="musicFile" type="text" placeholder="请输入歌曲文件" /></p>
+                     <p>图片文件 <input id="imgFile" type="text" placeholder="请输入图片文件" /></p>
+                     <p>播放费用 <input id="playCost" type="text" placeholder="请输入购买播放所需费用" /> 元</p>
+                     <p>版权费用 <input id="copyrightCost" type="text" placeholder="请输入歌曲名" /> 元</p>
+                   </div>
+                   <div class="col-md-6">
+                     <p>歌曲作者 <input id="musicAuthor" type="text" placeholder="请输入歌曲作者" /></p>
+                     <p>歌曲地址 <input id="musicAddress" type="text" placeholder="请输入歌曲地址" /></p>
+                     <p>图片地址 <input id="imgAddress" type="text" placeholder="请输入图片地址" /></p>
+                   </div>
+                 </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-danger"  data-toggle="modal" data-target='#myModal2' data-dismiss="modal" id="pxqNext">下一步</button>
+              <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- next -->
+      <div class="modal fade htapWin" tabindex="-2" id="myModal2" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h3 class="modal-title">付款成功</h3>
+            </div>
+            <div class="progressInfo">
+            	<img src="../images/copyInfo.png" alt="" />
+            </div>
+            <div class="modal-body">
+              <div class="modal-box">
+              	<table  id="table_view" width="100%">
+              		<tr>
+              			<td width="25%">版权类型</td>
+              			<td width="25%">版权所有者</td>
+              			<td width="25%">版权权益（%）</td>
+              			<td width="25%"></td>
+              		</tr>
+              		<tr>
+  						<td width="25%"><input type="text" placeholder="输入版权类型"/></td>
+  						<td width="25%"><input type="text" placeholder="输入版权所有者账号"/></td>
+  						<td width="25%"><input type="text" placeholder="输入权益比例"/></td>
+  						<td width="25%" class="addItem"><img src="../images/additem.png" alt="" /></td>
+  					</tr>
+              	</table>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-toggle="modal" data-target='#myModal1' data-dismiss="modal" >上一步</button>
+              <button type="button" class="btn btn-danger" id="modalSubmit">提交</button>
+              <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--支付提示-->
+      <div class="tapWin">
+      	<div class="dialog">
+      		<div class="dialog-header">支付提示</div>
+      		<div class="dialog-body">
+      			<h3>您需要支付5元认证费用，我们将从您的账户中扣除！</h3>
+            	<p>账户余额：300元</p>
+            	<p>支付密码：<input type="password" placeholder="输入支付密码" id="payPwd" /></p>     			
+      		</div>
+      		<div class="dialog-footer">
+      			<a href="#" class="checkBtn">确认支付</a>
+      			<a href="#" class="cancle">取消</a>
+      		</div>
+      	</div>
+      </div>
+<script type="text/javascript" src="../js/controller/generateStringByTemplate.js"></script>
+<!--  认证歌曲页面每一条数据的模板 -->
+<script type="text/template" id="songs_list">
+  <tr>
+      <td>%s</td>
+      <td>%n</td>
+      <td>2016-03-02 12:00</td>
+      <td>100</td>
+      <td>10</td>
+      <td><a class="pr_color" href="broadcastPage.html?title=%s&&artist=%n" target="_blank">查看</a></td>
+    </tr>
+</script>
+<script type="text/template" id="temp_view">
+<tr>
+	<td width="25%"><input type="text" placeholder="输入版权类型"/></td>
+	<td width="25%"><input type="text" placeholder="输入版权所有者账号"/></td>
+	<td width="25%"><input type="text" placeholder="输入权益比例"/></td>
+	<td width="25%" class="addItem"><img src="../images/additem.png" alt="" /></td>
+</tr>
+</script>
+<script>
+$('#table_view').delegate('.addItem','click',function(){
+          $('#table_view').append($('#temp_view').text());
+})
+//支付提示框：
+$('#modalSubmit').click(function(){
+	console.log('333333');
+	$('.tapWin').show();
+	
+})
+//点击支付提示框中的‘取消’按钮
+$('.cancle').click(function(){
+	$('.tapWin').hide();
+})
+$('.checkBtn').click(function(){
+//		$('.tapWin').hide();
+	$('.modal,.fade,.tapWin').hide();
+	
+})
+
+/*认证歌曲页面的歌曲名，歌曲作者等等的数据*/
+;!function(){
+  $.ajax({
+    url:"/songsList",
+    type:"POST",
+    timeout:300000,
+    success:function(res){
+      /*筛选不为空的显示*/
+      var _arr = [],
+           data = res.data;//是个对象数组，用for循环
+      for(var i=0,len=data.length;i<len;i++){
+        var ele = data[i];//是对象
+        if(ele.title&&ele.artist){
+          _arr.push(data[i])
+        }
+      }
+      $("#pTable").append(
+        generateStringByTemplate({
+                  id:"songs_list",
+                  params:{"%s":"title","%n":"artist"},
+                  data:_arr
+                })
+      )
+    }
+  })
+}()
+/*往appjs里面的合约上面放值，便于其他页面用认证的歌曲*/
+$("#pxqNext").click(function(){
+  var musicName = $("#musicName").val(),
+        musicAuthor = $("#musicAuthor").val(),
+        musicFile = $("#musicFile").val(),
+        musicAddress = $("#musicAddress").val();
+        /*imgFile = $("#imgFile").val(),
+        imgAddress = $("#imgAddress").val(),
+        playCost = $("#playCost").val(),
+        copyrightCost = $("#copyrightCost").val();*/
+  $.ajax({
+    url:'/web3',
+    type:'POST',
+    data:{
+      musicName:musicName,
+      musicAuthor:musicAuthor,
+      musicFile:musicFile,
+      musicAddress:musicAddress
+    },
+    success:function(msg){
+      console.log(msg)
+      // if(msg == 1){
+      //   console.log("successed!")
+      // }else{
+      //   console.log(msg.data);
+      // }
+    },
+    error:function(e){
+      console.log(e);
+    }
+  })
+})
+</script>
+
