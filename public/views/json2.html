@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>写前后台接口，调用</title>
+</head>
+<body> 
+	<div id="aaa">
+			
+	</div>
+	==============
+	<div id="bbb">
+	
+	</div>
+	===============	
+	<div id="ccc">
+		
+	</div>
+	<script type="text/javascript" src="../js/libs/jquery-3.2.0.min.js"></script>
+	<script>
+	;!function(){
+		$(document.body).click(function(e){
+			var _target = e.target;
+			if(_target.nodeName === "H1"){
+				getData({status:2,id:$(_target).attr("name")},function(res,data,_arr){
+					$(data).each(function(i,ele){
+						_arr.push('<h3 name = "'+ele.key+'" super_name = "'+$(_target).attr("name")+'">'+ele.value+'</h3>');
+					})
+					// console.log($(_target).attr("name"));//点击那个的key
+
+					$("#bbb").html(_arr.join(''));
+					$("#ccc").html("");
+				});
+				
+			}
+			if(_target.nodeName === "H3"){
+				getData({status:3,id:$(_target).attr("name"),super_id:$(_target).attr("super_name")},function(res,data,_arr){
+					$(data).each(function(i,ele){
+						// console.log(i,ele);
+						_arr.push('<h5>'+ele+'</h5>');
+					})
+					$("#ccc").html(_arr.join(''));
+				});
+			}
+		})
+
+		getData({status:1},function(res,data,_arr){
+			$(data).each(function(i,ele){
+				// console.log(i,ele);
+				_arr.push('<h1 name = "'+ele.key+'">'+ele.value+'</h1>');
+			})
+			$("#aaa").html(_arr.join(''));
+		});
+
+		function getData(data,callback){
+		$.ajax({
+			url:"/aaa",
+			type:"POST",
+			data:data,
+			success:function(res){
+				var data = res.data;
+				var _arr = [];
+				callback(res,data,_arr);
+			}
+		})
+		}
+	}();
+	</script>
+</body>
+</html>

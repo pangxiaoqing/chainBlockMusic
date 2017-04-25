@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>写前后台接口，调用</title>
+</head>
+<body> 
+	<div id="aaa">
+			
+	</div>
+	==============
+	<div id="bbb">
+	
+	</div>
+	===============	
+	<div id="ccc">
+		
+	</div>
+	<script type="text/javascript" src="../js/libs/jquery-3.2.0.min.js"></script>
+	<script>
+	;!function(){
+		$(document.body).click(function(e){
+			var target = e.target;
+			if(target.nodeName === 'DIV'){
+				if($(target).attr('name') && !$(target).attr('super_name') ){
+					$.ajax({
+						url:"/aaa",
+						type:"POST",
+						data:{
+							status : 2,
+							id : $(target).attr('name')
+						},
+						success:function(res){console.log(res)
+							// console.log(res);
+							var arr = []
+							/*第一层*/
+							var data = res.data;
+							$(data).each(function(index,element){
+								arr.push("<div super_name='"+$(target).attr('name')+"' name='"+element.key+"'>"+element.value+"</div>");
+							});
+							
+							$("#bbb").html(arr.join(''))
+							
+							
+						}
+					})
+				}else{
+					$.ajax({
+						url:"/aaa",
+						type:"POST",
+						data:{
+							status : 3,
+							id : $(target).attr('name'),
+							super_id : $(target).attr('super_name')
+						},
+						success:function(res){console.log(res)
+							// console.log(res);
+							var arr = []
+							/*第一层*/
+							var data = res.data;
+							$(data).each(function(index,element){
+								arr.push("<div>"+element+"</div>");
+							});
+							
+							$("#ccc").html(arr.join(''))
+							
+							
+						}
+					})
+				}
+			}
+		});
+		$.ajax({
+			url:"/aaa",
+			type:"POST",
+			data:{
+				status : 1
+			},
+			success:function(res){
+				// console.log(res);
+				var arr = []
+				/*第一层*/
+				var data = res.data;
+				$(data).each(function(index,element){
+					arr.push("<div name='"+element.key+"'>"+element.value+"</div>");
+				});
+				
+				$("#aaa").html(arr.join(''))
+				
+				
+			}
+		})
+	}();
+	</script>
+</body>
+</html>

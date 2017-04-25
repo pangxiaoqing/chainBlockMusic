@@ -96,7 +96,7 @@
         <div class="row"><div class="col-md-12">%s</div></div>
         <div class="row index_pad_top15">
           <div class="col-md-4 index_ellipsis">作者：<span>%n</span></div>
-          <div class="col-md-2"><button type="button" class="btn btnModify" data-toggle="modal" data-target='#musicPlay'>播放</button></div>
+          <div class="col-md-2"><button type="button" class="btn btnModify" data-toggle="modal" data-target='#musicPlay' id="indexPlay">播放</button></div>
           <div class="col-md-3"><button type="button" class="btn btnModify" data-toggle="modal" data-target='#buyCopy'>购买版权</button></div>
           <div class="col-md-3"><a href="broadcastPage.html?title=%s&&artist=%n" target="_blank">详情</a></div>
         </div>
@@ -149,7 +149,17 @@
         })
       )
     })
-
+/*点击播放按钮弹出弹框，需要支付的费用计算*/
+$("#findSongList").on("#indexPlay","click",function(){
+  $.ajax({
+      url:"/broadcastSong",
+      type:"POST",
+      timeout:300000,
+      success:function(res){
+        console.log(res);
+      }
+    });
+})
     }
   });
   }()

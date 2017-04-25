@@ -58,7 +58,7 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-danger"  data-toggle="modal" data-target='#myModal2' data-dismiss="modal" id="pxqNext">下一步</button>
+              <button type="button" class="btn btn-danger"  data-toggle="modal" data-target='#myModal2' data-dismiss="modal">下一步</button>
               <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
             </div>
           </div>
@@ -142,9 +142,56 @@ $('#table_view').delegate('.addItem','click',function(){
 })
 //支付提示框：
 $('#modalSubmit').click(function(){
-	console.log('333333');
 	$('.tapWin').show();
-	
+  /*往appjs里面的合约上面放值，便于其他页面用认证的歌曲*/
+	  var musicName = $("#musicName").val(),
+              musicAuthor = $("#musicAuthor").val(),
+              musicFile = $("#musicFile").val(),
+              musicAddress = $("#musicAddress").val();
+              imgFile = $("#imgFile").val(),
+              imgAddress = $("#imgAddress").val(),
+              playCost = $("#playCost").val(),
+              copyrightCost = $("#copyrightCost").val(),
+              tableView = $("#table_view").find("tr"),//取出table中的所有的tr行
+              arr_copyright_owner = [],
+              arr_copyright_interests = [];
+              //for循环取到每一个tr的内容
+              for(var i=0,len = tableView.length;i<len;i++){
+                var td_copyright_owner = $(tableView[i]).find("td").eq(1);
+                var td_copyright_interests = $(tableView[i]).find("td").eq(2);
+                var input_copyright_owner = $(td_copyright_owner).find("input").val();
+                var input_copyright_interests = $(td_copyright_interests).find("input").val();
+                arr_copyright_owner.push(input_copyright_owner);
+                arr_copyright_interests.push(input_copyright_interests);
+              }
+        $.ajax({
+          url:'/web3',
+          type:'POST',
+          data:{
+            musicName:musicName,
+            musicAuthor:musicAuthor,
+            musicAddress:musicAddress,
+            imgAddress:imgAddress,
+            musicFile:musicFile,
+            imgFile:imgFile,
+            playCost:playCost,
+            copyrightCost:copyrightCost,
+            //向后台传数据只能传串，通过join方法将数组变成字符串
+            contrlbutors:arr_copyright_owner.join(','),
+            contrlbutorShares:arr_copyright_interests.join(',')
+          },
+          success:function(msg){
+            console.log(msg)
+            // if(msg == 1){
+            //   console.log("successed!")
+            // }else{
+            //   console.log(msg.data);
+            // }
+          },
+          error:function(e){
+            console.log(e);
+          }
+        })
 })
 //点击支付提示框中的‘取消’按钮
 $('.cancle').click(function(){
@@ -182,37 +229,6 @@ $('.checkBtn').click(function(){
     }
   })
 }()
-/*往appjs里面的合约上面放值，便于其他页面用认证的歌曲*/
-$("#pxqNext").click(function(){
-  var musicName = $("#musicName").val(),
-        musicAuthor = $("#musicAuthor").val(),
-        musicFile = $("#musicFile").val(),
-        musicAddress = $("#musicAddress").val();
-        /*imgFile = $("#imgFile").val(),
-        imgAddress = $("#imgAddress").val(),
-        playCost = $("#playCost").val(),
-        copyrightCost = $("#copyrightCost").val();*/
-  $.ajax({
-    url:'/web3',
-    type:'POST',
-    data:{
-      musicName:musicName,
-      musicAuthor:musicAuthor,
-      musicFile:musicFile,
-      musicAddress:musicAddress
-    },
-    success:function(msg){
-      console.log(msg)
-      // if(msg == 1){
-      //   console.log("successed!")
-      // }else{
-      //   console.log(msg.data);
-      // }
-    },
-    error:function(e){
-      console.log(e);
-    }
-  })
-})
+
 </script>
 
