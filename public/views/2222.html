@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>a</title>
+<style type="text/css">
+.wrap{overflow: hidden;}
+.inner{float: left;width: 30%;}
+#list1{background-color: lightgreen;}
+#list2{background-color: lightgoldenrodyellow;}
+#list3{background-color: lightcyan;}
+ 
+#list1 h1{font-size: 18px;line-height: 32px;}
+#list2 h3{font-size: 16px;line-height: 28px;}
+#list3 h5{font-size: 14px;line-height: 24px;}
+.inner h1,.inner h3,.inner h5{cursor: pointer;text-align: center;}
+.inner h1:hover{background-color: lavenderblush;}
+.inner h3:hover{background-color: linen;}
+.inner h5:hover{background-color: lightblue;}
+ 
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1 id="result"></h1>
+<div class="inner" id="list1"></div>
+<div class="inner" id="list2"></div>
+<div class="inner" id="list3"></div>
+</div>
+</body>
+<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+<script type="text/javascript">
+$(function(){
+$.get("js/province_b.xml",function(data){
+// console.log($(data).find('sheng[code=01]')[0])
+// console.log(data.getElementsByTagName('sheng'))
+var provinceArr=$(data).find('sheng');
+var aaaa='';
+$.each(provinceArr, function(index,value) {
+aaaa=aaaa+'<h1 class="lv1" code='+provinceArr[index].attributes.code.value+' key="'+index+'">'+provinceArr[index].attributes.name.value+'</h1>';
+});
+$('#list1').append(aaaa);
+$(document.body).click(function(e){
+var thisnode=e.target.nodeName;
+if(thisnode=='H1'){
+$('#list2').html('');
+$('#list3').html('');
+var a=e.target.attributes.key.value;
+var clked=e.target.innerText;
+var cityArr=provinceArr[a].children;
+$.each(cityArr, function(ind,value) {
+// console.log(ind,value);
+$('#list2').append('<h3 class="lv2" beforekey="'+a+'"  key="'+ind+'" code="'+cityArr[ind].attributes.code.value+'" val1="'+clked+'">'+cityArr[ind].attributes.name.value+'</h3>');
+});
+}
+if(thisnode=='H3'){
+$('#list3').html('');
+var a=e.target.attributes.beforekey.value;
+var b=e.target.attributes.key.value;
+var val1=e.target.attributes.val1.value;
+var val2=e.target.innerText;
+var areaArr=provinceArr[a].children[b].children;
+// console.log(areaArr);
+$.each(areaArr, function(i,v) {
+$('#list3').append('<h5 val1="'+val1+'" val2="'+val2+'">'+areaArr[i].attributes.name.value+'</h5>');
+});
+}
+if(thisnode=='H5'){
+var val1=e.target.attributes.val1.value;
+var val2=e.target.attributes.val2.value;
+var val3=e.target.innerText;
+console.log(val1,val2,val3);
+$('#result').text(val1+'==>'+val2+'==>'+val3);
+}
+})
+})
+})
+</script>
+</html>
+

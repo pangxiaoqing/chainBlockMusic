@@ -4,15 +4,21 @@ var bodyParser = require('body-parser');
 var Web3 = require("web3");
 var abi = require('./public/json/abi.json');
 var json = require('./public/json/json.json');
+//var xml = require('./public/json/json.xml');
 var ADDR = abi.addr;
 var ABI = abi.abi;
 
 app.use(express.static('public'));
 app.use(express.static('public/views'));
+app.use(express.static('public/json'));
 
 app.get('/index.html', function (req, res) {
    res.sendFile( __dirname + "/" + "index.html" );
 })
+/*app.get('/json.xml', function (req, res) {
+	console.log(res)
+   res.send('hello')
+})*/
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -197,7 +203,10 @@ app.post('/aaa',function(req,res){//req是要去取得前台的请求，res是�
 })
 
 
-
+//XML调用
+/*app.post('/bbb',function(req,res){
+	//res.send({data:xml})
+})*/
 
 
 
