@@ -4,14 +4,13 @@
 	<meta charset="UTF-8">
 	<title>调xml，写前后台接口，调用</title>
 	<style type="text/css">
-		.aaa h3{
+		.aaa h3,.bbb h4,.ccc h5{
 			display: inline-block;
 			margin:10px;
+			padding:6px 20px;
+			border:1px solid #ccc;
+			text-align: center;
 		}	
-		.bbb h4{
-			display: inline-block;
-			margin: 10px;
-		}
 	</style>
 </head>
 <body> 
@@ -70,37 +69,29 @@
 						$(_city).each(function(i,ele){
 							// console.log(ele.attributes.name.value);
 							var _cityname = ele.attributes.name.value;
-							_arr.push('<h4 id="'+i+'">'+_cityname+'</h4>');
+							_arr.push('<h4 id="'+_id+'" id2 = "'+i+'">'+_cityname+'</h4>');
 						})
 						// console.log(_arr);
 						$(".bbb").html(_arr.join(''));	
 					}
 					//第三级
 					if(_target.nodeName === "H4"){
+						_arr = [];
 						var _id = $(_target).attr('id');
-						var _area = _sheng[_id].children;
+						var _id2 = $(_target).attr('id2');
+						var _area = _sheng[_id].children[_id2].children;
+						// console.log(_area)//点击到的2级city下的area的数组
 						$(_area).each(function(i,ele){
-							console.log(ele);
+							// console.log(ele.attributes.name.value);
+							var _areaname = ele.attributes.name.value;
+							_arr.push('<h5 id3 = "'+i+'">'+_areaname+'</h5>');
 						})
-						console.log(_area)
-						// console.log($(_target).attr('id'));//序列号0,1,2....
-						// var _id = $(_target);//看节点的attributes属性
-						// var _id = _target.attributes.id.value; //序列号
-						// console.log(_id);
-						// var _h3innerhtml = _target.innerText;
-						// console.log(_h3innerhtml);
-						// var _city = $(_sheng[_id]).find('city');
-						// // var _city = _sheng[_id].children;
-						// console.log(_city);
-						// var _h3attr = $(_target).attr('id');
-						// _arr = [];
-						// $(_city).each(function(i,ele){
-						// 	// console.log(ele.attributes.name.value);
-						// 	var _cityname = ele.attributes.name.value;
-						// 	_arr.push('<h4>'+_cityname+'</h4>');
-						// })
-						// // console.log(_arr);
-						// $(".bbb").html(_arr.join(''));	
+						$(".ccc").html(_arr.join(''));
+					}
+					//第三级点击之后
+					if(_target.nodeName === "H5"){
+						var _id = $(_target).attr('id3');
+						console.log(_id);
 					}
 				})
 
