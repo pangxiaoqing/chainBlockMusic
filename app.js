@@ -2,241 +2,599 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var Web3 = require("web3");
-var abi = require('./public/json/abi.json');
-var json = require('./public/json/json.json');
-//var xml = require('./public/json/json.xml');
-var ADDR = abi.addr;
-var ABI = abi.abi;
-
+var abi = require('./public/js/json/abi10.json');
+var LOGADDR = abi.logAddr;
+var LOGABI = abi.logAbi;
+var WORKABI = abi.workAbi;
+var WORKBIN = abi.workBin;
+var LICENSEABI = abi.licenseAbi;
+var LICENSEBIN = abi.licenseBin;
 app.use(express.static('public'));
 app.use(express.static('public/views'));
-app.use(express.static('public/json'));
-
+//解决跨域问题
+app.all('*', function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
+    res.header("X-Powered-By",' 3.2.1')
+    next();
+});
 app.get('/index.html', function (req, res) {
    res.sendFile( __dirname + "/" + "index.html" );
 })
-/*app.get('/json.xml', function (req, res) {
-	console.log(res)
-   res.send('hello')
-})*/
 
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
-
-var server = app.listen(3080, function () {
-
-  var host = server.address().address
-  var port = server.address().port
-
-  // console.log("http://%s:%s", host, port);
-})
-/*web3起链子 start*/
-/*连党海洋的主链*/
 if (typeof web3 !== 'undefined') {
   web3 = new Web3(web3.currentProvider);
 } else {
   // set the provider you want from Web3.providers
   web3 = new Web3(new Web3.providers.HttpProvider("http://10.168.120.121:8545"));
+  // web3 = new Web3(new Web3.providers.HttpProvider("http://10.168.195.51:8545"));
+  // web3 = new Web3(new Web3.providers.HttpProvider("http://10.168.195.224:8545"));
 }
+//查看账户
+//console.log(web3.eth.coinbase);
+// console.log(web3.eth.accounts)
+// http://10.168.195.224:8545
+// 0xf599b54145d676adb93a65ad9fc60f5156184c31
+// 0x87cdbee2dbbc60b4476ca146b3164ab206ea7cde
+// 0x16899A2536d94b49324932e3aE66B2d8418dA55B
+// 0x215571459c798770394888feA1A5eA4dBE775DFE
 
-/*付费榜单列表接口workReleased事件，获取数据返给前台页面显示*/
+// http://10.168.120.121:8545
+// 0xed6f4e8a38fdf92170b826315eaafdbd793c7d37
+// 0x327192220b13cfafba6c205a079836df94c7d28e
+// 0xe3fe086096f35da9a6303a9fbb01d2de4e0c4d49
+// 0xd576f094083772a0318dd579efd1670146164042
+
+// http://10.168.195.51:8545
+// 0x1fa95eec0ac7c84ca0e6d141571164b27c194145
+// 0xffdaec7c3072b1d5f6a18527dc1a1969b989e322
+// 0xf682a5a672c0286b2f54259d3180183a08bb2d3c
+// 0x9390b697ae5d9adaf1288b8fb98abedd462608fa
+// 0x91be687e626c0afb19d4e9966b1aab97f058e8a1
+
+// web3.eth.accounts[2]:0x0ab2bdd4e423d6be7cf6cd9ee1e5276e1dabfe36
+// web3.eth.accounts[3]:0xff27c4c5376d2524279a2f3e634e18ea85cfc885
+// web3.eth.accounts[4]:0xcd37a81ced709487d14d3d649fc394e2abb0eb2e
+
+
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
 // 调取workReleased事件，显示已认证歌曲列表
-//合约部署成功后，ClientReceipt调取主链，监听刚部署上的Work合约中的event
-app.post('/songsList',function(req,res){
-	/*部署合约，创建合约*/
-	var ClientReceipt = web3.eth.contract(ABI).at(ADDR /* address */);
-	// console.log(ClientReceipt.workReleased()); 
-	var event = ClientReceipt.workReleased({
-		sender:"0x6f26be7b3e309b647a116bc7e56a7f6d01327ef4"
-	},
-	{
-		fromBlock:0,
-		toBlock:'latest'
-	});
-	event.get(function(error,result){//用.get而不是用.watch（监听）方法是因为.watch方法是实时变化的，会只显示最后也是最新的一条，而.get方法是显示全部的。
-		// console.log('11111111111111111111111111');
-		// console.log(result);
-		var _arr = [ ];
-		for(var i=0,len=result.length;i<len;i++){
-			_arr.push(result[i].args);
-		}
-		res.send({success:1,data:_arr})
-	})
-})
+app.post('/songsList', function(req, res){
+  //console.log(req.body.authsong);
+  var authsong = req.body.authsong;
+  //合约部署成功后，myContract调取主链，监听刚部署上的Work合约中的event
+  if(req.body.authsong){
+    var sender = {
+      // sender:LOGADDR,
+      owner:web3.eth.accounts[0]
+    }
+  }else{
+    var sender = {
+      // sender:LOGADDR
+    }
+  }
+  var _arr = [];
+  var myContract1 = web3.eth.contract(LOGABI).at(LOGADDR);
+  var event = myContract1.licenseReleased(sender,{fromBlock:0, toBlock:'latest'});
+  event.get(function(err,result){
+    for(var i=0,len=result.length;i<len;i++){
+      if(result[i].args.title){
+        // var workAddr = result[i].args.work;
+        // var workContract = web3.eth.contract(WORKABI).at(workAddr);
+        // var title = workContract.title.call();
+        // var artist = workContract.artist.call();
+        //web3.toUtf8 编译bytes32
+        var artist = web3.toUtf8(result[i].args.artist);
+        var title = web3.toUtf8(result[i].args.title);
+        var lisence = result[i].args.lisence;
+        //用于列表排序的时间戳
+        var time = web3.toDecimal(result[i].args.nowTime)
+        if(authsong){
+          var lisenceContract = web3.eth.contract(LICENSEABI).at(lisence);
+          var playCount = lisenceContract.playCount.call().toNumber();
+          var buyCount = lisenceContract.buyCount.call().toNumber();
+          _arr.push({title:title,artist:artist, lis:lisence,time:time,playCount:playCount,buyCount:buyCount})
+        }else{
+          _arr.push({title:title,artist:artist, lis:lisence,time:time});
+        }
+      }
+    }
+    //根据时间戳，将歌曲列表进行排序
+    var newarr =  _arr.sort(function(a,b){
+      return a.time - b.time;
+    }).reverse();
+    //console.log(newarr)
 
+    res.send({success:10,data:newarr});
+  })
+  //获取账户钱数的方法
+  //console.log(web3.fromWei(web3.eth.getBalance(web3.eth.coinbase), 'ether').toNumber());
+});
 
-// 版权所有者获取
-// console.log(web3.eth.accounts[0]);0xe99433462677d612978cc1223952608189ae54dd
-// console.log(web3.eth.accounts[1]);0x8a39a4656ff970c189bcc3c1f728fd2021b5ab09
-// console.log(web3.eth.accounts[2]);0x34bd11027b616e8453db36995735745bc6353cad
+/***
+  发现歌曲页面:点击播放/购买版权按钮,调取licenseReleased事件,显示歌曲所需费用
+***/
+app.post('/broadcastSong', function(req,res){
+  var _arr = [];
+  //console.log(req.body.addr);
+  var licenseAddr = req.body.addr;
+  var number = parseInt(req.body.num);
+  var action = req.body.action;
+  //实例化lisenceContract合约
+  var lisenceContract = web3.eth.contract(LICENSEABI).at(licenseAddr);
+  //账户总金额
+  var coinbaseM = web3.fromWei(web3.eth.getBalance(web3.eth.accounts[0]), 'ether').toNumber();
+  var perPlay,perBuy;
+  // console.log(number);
+  // console.log(typeof number);
+  var result = lisenceContract.isBuyer(licenseAddr,web3.eth.accounts[0]);
+  //console.log(result);
+  if(!result){
+    if(number === 1){
+      perPlay = lisenceContract.playPrice.call().toNumber();
+      _arr.push({per:perPlay,coinbaseM:coinbaseM,licenseAddr:licenseAddr,number:number,action:action});
+    }else{
+      perBuy = lisenceContract.buyPrice.call().toNumber();
+      _arr.push({per:perBuy,coinbaseM:coinbaseM,licenseAddr:licenseAddr,number:number,action:action});
+    }
+    res.send({success:1,data:_arr});
+  }else{
+    res.send({success:2,data:'您已购买过歌曲'});
+  }
+  // console.log(_arr);
 
+});
+/***
+  发现歌曲页面:输入密码，点击确认支付按钮接口
+***/
+app.post('/confirmPay', function(req,res){
+  var licenseAddr = req.body.addr;
+  var playVal = req.body.playVal;
+  var password = req.body.password;
+  var number = parseInt(req.body.num);
+  var action = req.body.action;
+  // console.log(number);
+  // console.log(action);
+  // console.log(licenseAddr);
+  // console.log(typeof licenseAddr);
+  // console.log(web3.isAddress(licenseAddr));
 
-//获取账户钱数的方法
-  // console.log(web3.fromWei(web3.eth.getBalance(web3.eth.coinbase), 'ether').toNumber());
+  web3.personal.unlockAccount(web3.eth.accounts[0],password);
+  var lisenceContract = web3.eth.contract(LICENSEABI).at(licenseAddr);
+  var hash;
+  hash = lisenceContract.play.sendTransaction(number,{from:web3.eth.accounts[0], gas:3000000, value:web3.toWei(playVal,'ether')});
+  //var hash = lisenceContract.play.sendTransaction(number,{from:web3.eth.coinbase, gas:3000000, value:web3.toWei(playVal,'ether')});
+  // console.log(6767);
+  // console.log(hash);
+  var filter = web3.eth.filter("latest");
+  filter.watch(function(err, result) {
+      if(err) {
+          //console.log(err);
+      } else {
+          //console.log("Block hash is " + result);
+          var block = web3.eth.getBlock(result, true);
+          // console.log(block);
+          var transactions = block.transactions;
+          for(var i=0; i<transactions.length; i++) {
+              if(hash == transactions[i].hash) {
+                  //console.log('Transaction has mined!');
+                  filter.stopWatching();
+                  var obj_arr;
+                  var new_arr = [];
+                  obj_arr = lisenceContract.getURL();
+                  new_arr.push(web3.toUtf8(obj_arr[1]));
+                  new_arr.push(web3.toUtf8(obj_arr[2]));
+                  new_arr.push(obj_arr[3].toNumber());
+                  new_arr.push(action);
+                  new_arr.push(licenseAddr);
+                  //console.log(new_arr)
+                  res.send({"success":1,data:new_arr});
+              }
+          }
+      }
+   });
+});
+/***
+  发现歌曲页面：点击详情按钮，调取接口显示新页面
+  认证歌曲页面：点击查看按钮，调取接口显示新页面
+***/
+app.post('/detailMess',function(req,res){
+  var licenseAddr = req.body.addr;
+  var action = req.body.action;
+  var lisenceContract = web3.eth.contract(LICENSEABI).at(licenseAddr);
+  var new_arr = [];
+  // console.log(licenseAddr)
+  // console.log(action)
+  var result = lisenceContract.isBuyer(licenseAddr,web3.eth.accounts[0]);
+  //console.log(result);
+  if(req.body.page){
+    var obj_arr = lisenceContract.getURL();
+    new_arr.push(web3.toUtf8(obj_arr[1]));
+    new_arr.push(web3.toUtf8(obj_arr[2]));
+    new_arr.push(obj_arr[3].toNumber());
+    new_arr.push(action);
+    new_arr.push(licenseAddr);
+    res.send({"success":1,data:new_arr});
+  }else{
+    if(!result){
+      var obj_arr = lisenceContract.getURL();
+      new_arr.push(web3.toUtf8(obj_arr[1]));
+      new_arr.push(web3.toUtf8(obj_arr[2]));
+      new_arr.push(obj_arr[3].toNumber());
+      new_arr.push(action);
+      new_arr.push(licenseAddr);
+      res.send({"success":1,data:new_arr});
+    }else{
+      res.send({success:2,data:'您已购买过歌曲'});
+    }
+  }
+});
+//购买记录
+app.post('/purchaseRecord',function(req,res){
+  var Client=web3.eth.contract(LOGABI).at(LOGADDR);
+   		var event=Client.listen({
+				// sender:LOGADDR,
+				buyer:web3.eth.accounts[0]
+			},{fromBlock:0,toBlock:'latest'});
+			event.get(function(error,result){
+				// console.log(web3.eth.accounts[4]);
+				// console.log(typeof(web3.eth.accounts[4]));
+				// console.log(result);
+				var arr=[];
+				for (var i=0;i<result.length;i++) {
+					var workAddr=result[i].args.work;
+					var workContract=web3.eth.contract(WORKABI).at(workAddr);
+					var title=workContract.title.call();
+					var artist=workContract.artist.call();
+					var lisence=result[i].args.license;
+					var itstime=result[i].args.nowTime.toNumber();
+					var purpose=result[i].args.purpose.toNumber();
+					//console.log(lisence);
+					arr.push({title:title,artist:artist,lisence:lisence,itstime:itstime,purpose:purpose});
+				}
+				// console.log(arr);
+        var new_arr = arr.sort(function(a,b){
+          return a.itstime - b.itstime;
+        }).reverse();
+				res.send({success:1,data:new_arr});
+ })
 
-//点击播放按钮调取licenseReleased事件,显示歌曲所需费用
-/*app.post('/broadcastSong', function(req,res){
-  console.log(11);
-  var myContract = web3.eth.contract(ABI).at(ADDR);
-  var event = myContract.licenseReleased({
-    sender:"0x63a1821051e808a4ecbec3926684144f8c7d74fb"
+});
+/***
+  歌曲播放页面，区块链记录table表单信息接口
+***/
+app.post('/blockRecord',function(req,res){
+  var new_arr = [];
+  var myContract1 = web3.eth.contract(LOGABI).at(LOGADDR);
+  var event = myContract1.listen({
+    // sender:LOGADDR
   },{fromBlock:0, toBlock:'latest'});
   event.get(function(err,result){
-    console.log(11);
-    console.log(result);
+    // console.log(result);
+    for(var i = 0; i < result.length; i++){
+      if(result[i].address){
+        var buyer = result[i].args.buyer;
+        var time = result[i].args.nowTime.toNumber();
+        var purpose = result[i].args.purpose;
+        new_arr.push({buyer:buyer,time:time,purpose:purpose})
+      }
+    }
+    var newarr =  new_arr.sort(function(a,b){
+      return a.time - b.time;
+    }).reverse();
+    // console.log(new_arr);
+    res.send({success:10,data:newarr});
+  });
+});
+/***
+  歌曲播放页面，版权信息table表单信息接口
+***/
+app.post('/coprMess',function(req,res){
+  var lisence = req.body.lisence;
+  //console.log(lisence);
+  var lisenceContract = web3.eth.contract(LICENSEABI).at(lisence);
+  var playPrice = lisenceContract.playPrice.call().toNumber();
+  var buyPrice = lisenceContract.buyPrice.call().toNumber();
+  var shares_newArr = [],benefit_newArr = [];
+  var obj_arr = lisenceContract.getPlayInfo();
+  // console.log(obj_arr);
+  var contributors_arr = obj_arr[0];
+  var shares_arr = obj_arr[1];
+  var benefit_arr = obj_arr[2];
+  //对getPlayInfo方法中的数据进行处理
+  for(var i = 0; i < shares_arr.length; i++){
+    shares_newArr.push(shares_arr[i].toNumber());
+  }
+  for(var i = 0; i < benefit_arr.length; i++){
+    //console.log(benefit_arr[i]);
+    benefit_newArr.push(web3.toUtf8(benefit_arr[i]));
+  }
+  var new_arr = [];
+  new_arr.push(contributors_arr);
+  new_arr.push(shares_newArr);
+  new_arr.push(benefit_newArr);
+  // console.log(new_arr);
+  //二维数组纵向取值并重组成新的二维数组
+  var newArr = new_arr[0].map(function(col,i){
+    return new_arr.map(function(row){
+      return row[i];
+    })
+  });
+  // console.log(newArr);
+  //将对象转换成对象数组，便于页面取值
+  var array1 = [],array2 = [];
+  for(var i = 0; i < newArr.length; i++){
+    array1.push({owner:newArr[i][0],right:newArr[i][1],type:newArr[i][2]});
+  }
+  array2.push({playPrice:playPrice,buyPrice:buyPrice});
+  // console.log(array);
+  res.send({"success":1,data1:array1,data2:array2});
+});
+
+//账户明细调用listen
+app.post('/accountDetailList', function(req, res){
+  //合约部署成功后，myContract调取主链，监听刚部署上的Work合约中的event
+  //获取账户余额
+  var balance = web3.eth.getBalance(web3.eth.accounts[0]).toNumber();
+  // console.log(web3.fromWei(balance,"ether"))
+  //转换单位
+  var Obalance = web3.fromWei(balance,"ether");
+  var _arr = [];
+  var _count = [];
+  var myContract1 = web3.eth.contract(LOGABI).at(LOGADDR);
+  if(req.body.a ==1){
+    event = myContract1.listen({
+      sender:LOGADDR,
+      buyer:web3.eth.coinbase
+    },{fromBlock:0, toBlock:'latest'});
+    event.get(function(err,result){
+      var i = 0;
+      var j = 0;
+      _count = [];
+      for(var x in result){
+        var _purpose = result[x].args.purpose.toNumber();
+        if(_purpose==1){
+          i++;
+        }
+        if(_purpose==2){
+          j++;
+        }
+      }
+      _count.push({ptimes:i,buySongs:j,balance:Obalance})
+      res.send({data_1:_count})
+    })
+
+  }
+  else{
+    event = myContract1.listen({
+      sender:LOGADDR
+    },{fromBlock:0, toBlock:'latest'});
+    event.get(function(err,result){
+        _arr = [];
+       // var i = 0;
+        //var j = 0;
+      for(var i in result){
+        var _data = result[i].args;
+        var _purpose = result[i].args.purpose.toNumber();
+        //处理money数据 使之成为数字而不是一串
+        var coinbaseM = web3.fromWei(result[i].args.money, 'ether').toNumber();
+        _arr.push({work:_data.work,money:coinbaseM,buyer:_data.buyer,nowTime:_data.nowTime,purpose:_purpose,balance:Obalance});
+
+      }
+
+      res.send({success:10,data:_arr});
+    })
+  }
+});
+
+//账户明细页面调用share
+app.post('/accountDetailList1', function(req, res){
+  //合约部署成功后，myContract调取主链，监听刚部署上的Work合约中的event
+  var _arr = [];
+  var myContract1 = web3.eth.contract(LOGABI).at(LOGADDR);
+  var event = myContract1.share({
+    sender:LOGADDR
+  },{fromBlock:0, toBlock:'latest'});
+  event.get(function(err,result){
+    _arr = [];
+    for(var i in result){
+      var _data = result[i].args;
+      //处理money数据 使之成为数字而不是一串
+      var coinbaseM = web3.fromWei(result[i].args.money, 'ether').toNumber();
+        _arr.push({work:_data.work,money:coinbaseM,sharer:_data.sharer,nowTime:_data.nowTime});
+    }
+    res.send({success:10,data:_arr});
   })
-});*/
-/*认证歌曲，先认证*/
-/*往链上传work合约，把数据塞进去*/
-app.post('/web3',function(req,res){
-	// console.log(req.body.contrlbutors)
-	// console.log(req.body);
-	// res.send({success : 1});
-	var logAddress = ADDR,
-	      musicName = req.body.musicName,
-	      musicAuthor = req.body.musicAuthor,
-	      musicAddress = req.body.musicAddress;
-	      imgAddress = req.body.imgAddress;
-	      musicFile = req.body.musicFile;
-	      imgFile = req.body.imgFile;
-	      playCost = req.body.playCost;
-	      copyrightCost = req.body.copyrightCost;
-	      //前台传过来的是一个字符串，后台需要的是数组，用split方法将字符串变成数组
-	      contrlbutors = req.body.contrlbutors.split(','),
-	      contrlbutorShares = req.body.contrlbutorShares.split(',');
-	web3.personal.unlockAccount(web3.eth.coinbase,'12345')
-  	var untitled_workContract = web3.eth.contract([{'constant': true, 'inputs': [], 'name': 'artist', 'outputs': [{'name': '', 'type': 'string'}], 'payable': false, 'type': 'function'}, {'constant': true, 'inputs': [], 'name': 'title', 'outputs': [{'name': '', 'type': 'string'}], 'payable': false, 'type': 'function'}, {'constant': true, 'inputs': [], 'name': 'log', 'outputs': [{'name': '', 'type': 'address'}], 'payable': false, 'type': 'function'}, {'constant': true, 'inputs': [], 'name': 'contractVersion', 'outputs': [{'name': '', 'type': 'string'}], 'payable': false, 'type': 'function'}, {'constant': true, 'inputs': [], 'name': 'imageUrl', 'outputs': [{'name': '', 'type': 'string'}], 'payable': false, 'type': 'function'}, {'constant': true, 'inputs': [], 'name': 'metadataUrl', 'outputs': [{'name': '', 'type': 'string'}], 'payable': false, 'type': 'function'}, {'inputs': [{'name': '_logAddress', 'type': 'address'}, {'name': '_title', 'type': 'string'}, {'name': '_artist', 'type': 'string'}, {'name': '_imageUrl', 'type': 'string'}, {'name': '_metadataUrl', 'type': 'string'}], 'payable': false, 'type': 'constructor'}]);
-  	var untitled_work = untitled_workContract.new(
-  		logAddress,
-  		musicName,
-  		musicAuthor,
-  		musicAddress,
-  		imgAddress,
-  		{
-		       from: web3.eth.coinbase,
-		       data: '0x606060405234620000005760405162000bc838038062000bc8833981016040528080519060200190919080518201919060200180518201919060200180518201919060200180518201919050505b84600060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055508360019080519060200190828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f10620000dc57805160ff19168380011785556200010d565b828001600101855582156200010d579182015b828111156200010c578251825591602001919060010190620000ef565b5b5090506200013591905b808211156200013157600081600090555060010162000117565b5090565b50508260029080519060200190828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f106200018557805160ff1916838001178555620001b6565b82800160010185558215620001b6579182015b82811115620001b557825182559160200191906001019062000198565b5b509050620001de91905b80821115620001da576000816000905550600101620001c0565b5090565b50508060039080519060200190828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f106200022e57805160ff19168380011785556200025f565b828001600101855582156200025f579182015b828111156200025e57825182559160200191906001019062000241565b5b5090506200028791905b808211156200028357600081600090555060010162000269565b5090565b50508160049080519060200190828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f10620002d757805160ff191683800117855562000308565b8280016001018555821562000308579182015b8281111562000307578251825591602001919060010190620002ea565b5b5090506200033091905b808211156200032c57600081600090555060010162000312565b5090565b5050600060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1663841cf3cd3386866040518463ffffffff167c0100000000000000000000000000000000000000000000000000000000028152600401808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001806020018060200183810383528581815181526020019150805190602001908083836000831462000426575b805182526020831115620004265760208201915060208101905060208303925062000400565b505050905090810190601f168015620004535780820380516001836020036101000a031916815260200191505b508381038252848181518152602001915080519060200190808383600083146200049e575b8051825260208311156200049e5760208201915060208101905060208303925062000478565b505050905090810190601f168015620004cb5780820380516001836020036101000a031916815260200191505b5095505050505050600060405180830381600087803b15620000005760325a03f11562000000575050505b50505050505b6106bc806200050c6000396000f30060606040523615610076576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806343bc16121461007b5780634a79d50c1461011157806351973ec9146101a7578063a0a8e460146101f6578063aba831501461028c578063cd29c71a14610322575b610000565b34610000576100886103b8565b60405180806020018281038252838181518152602001915080519060200190808383600083146100d7575b8051825260208311156100d7576020820191506020810190506020830392506100b3565b505050905090810190601f1680156101035780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b346100005761011e610456565b604051808060200182810382528381815181526020019150805190602001908083836000831461016d575b80518252602083111561016d57602082019150602081019050602083039250610149565b505050905090810190601f1680156101995780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b34610000576101b46104f4565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b346100005761020361051a565b6040518080602001828103825283818151815260200191508051906020019080838360008314610252575b8051825260208311156102525760208201915060208101905060208303925061022e565b505050905090810190601f16801561027e5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b3461000057610299610554565b60405180806020018281038252838181518152602001915080519060200190808383600083146102e8575b8051825260208311156102e8576020820191506020810190506020830392506102c4565b505050905090810190601f1680156103145780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b346100005761032f6105f2565b604051808060200182810382528381815181526020019150805190602001908083836000831461037e575b80518252602083111561037e5760208201915060208101905060208303925061035a565b505050905090810190601f1680156103aa5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b60028054600181600116156101000203166002900480601f01602080910402602001604051908101604052809291908181526020018280546001816001161561010002031660029004801561044e5780601f106104235761010080835404028352916020019161044e565b820191906000526020600020905b81548152906001019060200180831161043157829003601f168201915b505050505081565b60018054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480156104ec5780601f106104c1576101008083540402835291602001916104ec565b820191906000526020600020905b8154815290600101906020018083116104cf57829003601f168201915b505050505081565b600060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b604060405190810160405280600481526020017f76312e300000000000000000000000000000000000000000000000000000000081525081565b60048054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480156105ea5780601f106105bf576101008083540402835291602001916105ea565b820191906000526020600020905b8154815290600101906020018083116105cd57829003601f168201915b505050505081565b60038054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480156106885780601f1061065d57610100808354040283529160200191610688565b820191906000526020600020905b81548152906001019060200180831161066b57829003601f168201915b5050505050815600a165627a7a72305820110643ca84d4737bcff3ab689164048439b88723181efd665bbb2c26aa5150930029',
-		       gas: '4700000'
-		}, function(e,contract){
-		     // res.send({success : 1});
-		      if(contract.address){
-		      	// console.log(contract.address);
-		      	/*往链上传Log合约,步新合约licenseContract*/
-		      	var _logAddress = ADDR;
-			var _workAddress = contract.address;
-			var _perPlay = playCost;
-			var _perBuy = copyrightCost;
-			var _resourceUrl = musicAddress;
-			var _metadataUrl = imgAddress;
-			var _royalties = [""];
-			var _royaltyAmounts = [""];
-			var _contributors = contrlbutors;
-			var _contributorShares = contrlbutorShares;
-			var untitled5_licenseContract = web3.eth.contract([{"constant":true,"inputs":[],"name":"resourceUrl","outputs":[{"name":"","type":"string"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"perPlay","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"perBuy","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"getURL","outputs":[{"name":"","type":"string"}],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"contributors","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"kill","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"licenseVersion","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"metadataVersion","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"totalEarned","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"royalties","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"workAddress","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"playCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"contractVersion","outputs":[{"name":"","type":"string"}],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"royaltyAmounts","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"flag","type":"bool"}],"name":"play","outputs":[],"payable":true,"type":"function"},{"constant":true,"inputs":[],"name":"metadataUrl","outputs":[{"name":"","type":"string"}],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"contributorShares","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_perPlay","type":"uint256"},{"name":"_perBuy","type":"uint256"},{"name":"_royalties","type":"address[]"},{"name":"_royaltyAmounts","type":"uint256[]"},{"name":"_contributors","type":"address[]"},{"name":"_contributorShares","type":"uint256[]"}],"name":"updateLicense","outputs":[],"payable":false,"type":"function"},{"inputs":[{"name":"_logAddress","type":"address"},{"name":"_workAddress","type":"address"},{"name":"_perPlay","type":"uint256"},{"name":"_perBuy","type":"uint256"},{"name":"_resourceUrl","type":"string"},{"name":"_metadataUrl","type":"string"},{"name":"_royalties","type":"address[]"},{"name":"_royaltyAmounts","type":"uint256[]"},{"name":"_contributors","type":"address[]"},{"name":"_contributorShares","type":"uint256[]"}],"payable":false,"type":"constructor"},{"payable":true,"type":"fallback"},{"anonymous":false,"inputs":[{"indexed":true,"name":"buyer","type":"address"},{"indexed":true,"name":"work","type":"address"},{"indexed":false,"name":"money","type":"uint256"}],"name":"listenEvent","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"sharer","type":"address"},{"indexed":true,"name":"work","type":"address"},{"indexed":false,"name":"money","type":"uint256"}],"name":"shareEvent","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"version","type":"uint256"}],"name":"licenseUpdateEvent","type":"event"}]);
-			var untitled5_license = untitled5_licenseContract.new(
-			_logAddress,
-			_workAddress,
-			_perPlay,
-			_perBuy,
-			_resourceUrl,
-			_metadataUrl,
-			_royalties,
-			_royaltyAmounts,
-			_contributors,
-			_contributorShares,
-			 {
-			     from: web3.eth.coinbase, 
-			     data: '0x606060405234156200000d57fe5b60405162001fea38038062001fea833981016040528080519060200190919080519060200190919080519060200190919080519060200190919080518201919060200180518201919060200180518201919060200180518201919060200180518201919060200180518201919050505b600060008b600a60006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055508a600160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555033600060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555087600290805190602001906200015c929190620005ae565b50866003908051906020019062000175929190620005ae565b506200019a8a8a88888888620004816401000000000262001534176401000000009004565b8a601060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550601060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1663ff3c1a8f6000604051602001526040518163ffffffff167c0100000000000000000000000000000000000000000000000000000000028152600401809050602060405180830381600087803b15156200026a57fe5b60325a03f115156200027857fe5b505050604051805190509150601060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1663e094826b6000604051602001526040518163ffffffff167c0100000000000000000000000000000000000000000000000000000000028152600401809050602060405180830381600087803b15156200031357fe5b60325a03f115156200032157fe5b505050604051805190509050600a60009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1663fd98a6bf600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff163085856040518563ffffffff167c0100000000000000000000000000000000000000000000000000000000028152600401808573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200183600019166000191681526020018260001916600019168152602001945050505050600060405180830381600087803b15156200045d57fe5b60325a03f115156200046b57fe5b5050505b50505050505050505050505062000784565b6000600060006000845186511415156200049b5760006000fd5b86518851141515620004ad5760006000fd5b600092505b8751831015620004e8578683815181101515620004cb57fe5b90602001906020020151840193505b8280600101935050620004b2565b600090505b8551811015620005235784818151811015156200050657fe5b90602001906020020151820191505b8080600101915050620004ed565b6064848301141515620005365760006000fd5b8960048190555085600890805190602001906200055592919062000635565b5084600990805190602001906200056e929190620006c4565b5087600690805190602001906200058792919062000635565b508660079080519060200190620005a0929190620006c4565b505b50505050505050505050565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f10620005f157805160ff191683800117855562000622565b8280016001018555821562000622579182015b828111156200062157825182559160200191906001019062000604565b5b50905062000631919062000716565b5090565b828054828255906000526020600020908101928215620006b1579160200282015b82811115620006b05782518260006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055509160200191906001019062000656565b5b509050620006c091906200073e565b5090565b82805482825590600052602060002090810192821562000703579160200282015b8281111562000702578251825591602001919060010190620006e5565b5b50905062000712919062000716565b5090565b6200073b91905b80821115620007375760008160009055506001016200071d565b5090565b90565b6200078191905b808211156200077d57600081816101000a81549073ffffffffffffffffffffffffffffffffffffffff02191690555060010162000745565b5090565b90565b61185680620007946000396000f30060606040523615610105576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806305e91fbc1461010e5780630f132027146101a75780631fe16f3a146101cd57806338bcdc1c146101f35780633cb5d1001461028c57806341c0e1b5146102ec57806350a5292f146102fe57806353c3af38146103245780636dfa8d991461034a5780637f77f574146103705780638160a485146103d05780638da5cb5b146104225780639761430214610474578063a0a8e4601461049a578063b328d63614610533578063c23c87d514610567578063cd29c71a14610581578063e0b7f8b21461061a578063ea666f941461064e575b61010c5b5b565b005b341561011657fe5b61011e610777565b604051808060200182810382528381815181526020019150805190602001908083836000831461016d575b80518252602083111561016d57602082019150602081019050602083039250610149565b505050905090810190601f1680156101995780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b34156101af57fe5b6101b7610815565b6040518082815260200191505060405180910390f35b34156101d557fe5b6101dd61081b565b6040518082815260200191505060405180910390f35b34156101fb57fe5b610203610821565b6040518080602001828103825283818151815260200191508051906020019080838360008314610252575b8051825260208311156102525760208201915060208101905060208303925061022e565b505050905090810190601f16801561027e5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b341561029457fe5b6102aa6004808035906020019091905050610907565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34156102f457fe5b6102fc610947565b005b341561030657fe5b61030e610a32565b6040518082815260200191505060405180910390f35b341561032c57fe5b610334610a38565b6040518082815260200191505060405180910390f35b341561035257fe5b61035a610a3e565b6040518082815260200191505060405180910390f35b341561037857fe5b61038e6004808035906020019091905050610a44565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34156103d857fe5b6103e0610a84565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b341561042a57fe5b610432610aaa565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b341561047c57fe5b610484610ad0565b6040518082815260200191505060405180910390f35b34156104a257fe5b6104aa610ad6565b60405180806020018281038252838181518152602001915080519060200190808383600083146104f9575b8051825260208311156104f9576020820191506020810190506020830392506104d5565b505050905090810190601f1680156105255780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b341561053b57fe5b6105516004808035906020019091905050610b10565b6040518082815260200191505060405180910390f35b61057f60048080351515906020019091905050610b35565b005b341561058957fe5b610591610df4565b60405180806020018281038252838181518152602001915080519060200190808383600083146105e0575b8051825260208311156105e0576020820191506020810190506020830392506105bc565b505050905090810190601f16801561060c5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b341561062257fe5b6106386004808035906020019091905050610e92565b6040518082815260200191505060405180910390f35b341561065657fe5b610775600480803590602001909190803590602001909190803590602001908201803590602001908080602002602001604051908101604052809392919081815260200183836020028082843782019150505050505091908035906020019082018035906020019080806020026020016040519081016040528093929190818152602001838360200280828437820191505050505050919080359060200190820180359060200190808060200260200160405190810160405280939291908181526020018383602002808284378201915050505050509190803590602001908201803590602001908080602002602001604051908101604052809392919081815260200183836020028082843782019150505050505091905050610eb7565b005b60028054600181600116156101000203166002900480601f01602080910402602001604051908101604052809291908181526020018280546001816001161561010002031660029004801561080d5780601f106107e25761010080835404028352916020019161080d565b820191906000526020600020905b8154815290600101906020018083116107f057829003601f168201915b505050505081565b60045481565b60055481565b610829611650565b600f60003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000208054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480156108fc5780601f106108d1576101008083540402835291602001916108fc565b820191906000526020600020905b8154815290600101906020018083116108df57829003601f168201915b505050505090505b90565b60088181548110151561091657fe5b906000526020600020900160005b915054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b600060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff161415156109a45760006000fd5b60003411156109b35760006000fd5b60003073ffffffffffffffffffffffffffffffffffffffff163111156109f4576109f33073ffffffffffffffffffffffffffffffffffffffff1631610f3b565b5b600060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16ff5b5b565b600d5481565b600e5481565b600c5481565b600681815481101515610a5357fe5b906000526020600020900160005b915054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b600060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b600b5481565b604060405190810160405280600481526020017f76312e300000000000000000000000000000000000000000000000000000000081525081565b600781815481101515610b1f57fe5b906000526020600020900160005b915090505481565b600060008215610bb057670de0b6b3a764000060045402915081341015610b5c5760006000fd5b81340390506000811115610bab573373ffffffffffffffffffffffffffffffffffffffff166108fc829081150290604051809050600060405180830381858888f193505050501515610baa57fe5b5b610bb4565b3491505b6002600f60003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000209080546001816001161561010002031660029004610c14929190611664565b50610c1e82610f3b565b81600c60008282540192505081905550600b60008154809291906001019190505550600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff167fe00c4546d70d822a6eb4c4beff5b3ddcfb11c69fbc6ef55a9ad810f47d032b73846040518082815260200191505060405180910390a3600a60009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1663e00c454633600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16856040518463ffffffff167c0100000000000000000000000000000000000000000000000000000000028152600401808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019350505050600060405180830381600087803b1515610dde57fe5b60325a03f11515610deb57fe5b5050505b505050565b60038054600181600116156101000203166002900480601f016020809104026020016040519081016040528092919081815260200182805460018160011615610100020316600290048015610e8a5780601f10610e5f57610100808354040283529160200191610e8a565b820191906000526020600020905b815481529060010190602001808311610e6d57829003601f168201915b505050505081565b600981815481101515610ea157fe5b906000526020600020900160005b915090505481565b600060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16141515610f145760006000fd5b6000341115610f235760006000fd5b610f31868686868686611534565b5b5b505050505050565b60006000600060006000600060006000601060149054906101000a900460ff1615610f665760006000fd5b6001601060146101000a81548160ff0219169083151502179055506008805490509750600096505b878710156111ff57606489600989815481101515610fa857fe5b906000526020600020900160005b505402811515610fc257fe5b049550600887815481101515610fd457fe5b906000526020600020900160005b9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1694508473ffffffffffffffffffffffffffffffffffffffff166108fc879081150290604051809050600060405180830381858888f19350505050151561104357fe5b600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168573ffffffffffffffffffffffffffffffffffffffff167fdb54f5050d90aa48da3074b1d55660317915729bc4a62e7bb094273a3ccc0846886040518082815260200191505060405180910390a3600a60009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1663db54f50586600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16896040518463ffffffff167c0100000000000000000000000000000000000000000000000000000000028152600401808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019350505050600060405180830381600087803b15156111e157fe5b60325a03f115156111ee57fe5b5050505b8680600101975050610f8e565b6006805490509350600092505b8383101561150c5760648960078581548110151561122657fe5b906000526020600020900160005b50540281151561124057fe5b04915060068381548110151561125257fe5b906000526020600020900160005b9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1690508073ffffffffffffffffffffffffffffffffffffffff168260405180807f706c617928626f6f6c2900000000000000000000000000000000000000000000815250600a01905060405180910390207c010000000000000000000000000000000000000000000000000000000090049060006040518363ffffffff167c0100000000000000000000000000000000000000000000000000000000028152600401808215151515815260200191505060006040518083038185886185025a03f1935050505015156113505760006000fd5b600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff167fdb54f5050d90aa48da3074b1d55660317915729bc4a62e7bb094273a3ccc0846846040518082815260200191505060405180910390a3600a60009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1663db54f50582600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16856040518463ffffffff167c0100000000000000000000000000000000000000000000000000000000028152600401808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019350505050600060405180830381600087803b15156114ee57fe5b60325a03f115156114fb57fe5b5050505b828060010193505061120c565b5b6000601060146101000a81548160ff0219169083151502179055505b505050505050505050565b60006000600060008451865114151561154d5760006000fd5b8651885114151561155e5760006000fd5b600092505b875183101561159657868381518110151561157a57fe5b90602001906020020151840193505b8280600101935050611563565b600090505b85518110156115ce5784818151811015156115b257fe5b90602001906020020151820191505b808060010191505061159b565b60648483011415156115e05760006000fd5b8960048190555085600890805190602001906115fd9291906116eb565b508460099080519060200190611614929190611775565b50876006908051906020019061162b9291906116eb565b508660079080519060200190611642929190611775565b505b50505050505050505050565b602060405190810160405280600081525090565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f1061169d57805485556116da565b828001600101855582156116da57600052602060002091601f016020900482015b828111156116d95782548255916001019190600101906116be565b5b5090506116e791906117c2565b5090565b828054828255906000526020600020908101928215611764579160200282015b828111156117635782518260006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055509160200191906001019061170b565b5b50905061177191906117e7565b5090565b8280548282559060005260206000209081019282156117b1579160200282015b828111156117b0578251825591602001919060010190611795565b5b5090506117be91906117c2565b5090565b6117e491905b808211156117e05760008160009055506001016117c8565b5090565b90565b61182791905b8082111561182357600081816101000a81549073ffffffffffffffffffffffffffffffffffffffff0219169055506001016117ed565b5090565b905600a165627a7a72305820fe43ed402c353751ee6a010ebbe05b4b2ecbca7efcbcaa9f48b1fe184cd94e570029', 
-			     gas: '4700000'
-			   },function (e, contractLicense){
-					// console.log(e, contractLicense);
-			    	if (contractLicense.address) {
-			              console.log(11);
-			              console.log(contractLicense.address);
-			              var myContract = web3.eth.contract(ABI).at(ADDR);
-			              var event = myContract.listen({
-			                sender:"0x63a1821051e808a4ecbec3926684144f8c7d74fb"
-			              },{fromBlock:0, toBlock:'latest'});
-			              event.get(function(err,result){
-			                console.log(33);
-			                // console.log(result);
-			              })
-			                 //console.log('Contract mined! address: ' + contract.address + ' transactionHash: ' + contract.transactionHash);
-			            }else{
-			              console.log(22);
-			            }
-			 })
-		      	res.send({success : 1});
-		      }
+  //获取账户钱数的方法
+  // console.log(web3.fromWei(web3.eth.getBalance(web3.eth.coinbase), 'ether').toNumber());
+});
+
+//账户中心数据调用
+app.post('/accountCenter', function(req, res){
+  //合约部署成功后，myContract调取主链，监听刚部署上的Work合约中的event
+  var _arr = [];
+  var myContract1 = web3.eth.contract(LOGABI).at(LOGADDR);
+  var event = myContract1.workReleased({
+    sender:LOGADDR,
+    owner:web3.eth.coinbase
+  },{fromBlock:0, toBlock:'latest'});
+  event.get(function(err,result){
+    _arr = [];
+    var j = 0;
+    for(var i in result){
+      j++
+    }
+    _arr.push({Csongs:j})
+    // console.log(j)
+    res.send({success:10,data:_arr});
+  })
+});
+
+app.post('/attestSong',function(req,res){
+  var _body = req.body;
+  var isP_arr = [], hasP_arr = [];
+  var logAddress = LOGADDR,
+      title = _body.title,
+      artist = _body.artist,
+      imageUrl = _body.imageUrl,
+      metadataUrl = _body.metadataUrl,
+      playPrice = _body.playPrice,
+      buyPrice = _body.buyPrice,
+      password = _body.password,
+      //前台传过来的是一个字符串，后台需要的是数组，用split方法将字符串变成数组
+      isParent = _body.isParent.split(','),
+      hasParent = _body.hasParent.split(','),
+      parents = _body.parents.split(','),
+      contributors = _body.contributors.split(','),
+      shares = _body.shares.split(','),
+      benefitTypes = _body.benefitTypes.split(',');
+  //console.log(typeof password);
+  //split()方法将boolean类型的字符串分割成string类型的字符串，在这里
+  //需要重新遍历赋值
+  var benefitTypes_arr = [];
+  for(var i = 0; i < isParent.length; i++){
+    benefitTypes_arr.push(web3.fromUtf8(benefitTypes[i]));
+    if(isParent[i] == 'true'){
+      isP_arr.push(true);
+    }else{
+      isP_arr.push(false);
+    }
+
+  }
+  for(var i = 0; i < hasParent.length; i++){
+    if(hasParent[i] == 'true'){
+      hasP_arr.push(true);
+    }else{
+      hasP_arr.push(false);
+    }
+  }
+
+  //支付密码验证
+  web3.personal.unlockAccount(web3.eth.coinbase,password);
+  // console.log(password);
+  // web3.personal.unlockAccount(web3.eth.coinbase,'12345');
+  var workContract = web3.eth.contract(WORKABI);
+  //var result = '00000';
+  var work = workContract.new(
+      logAddress,
+      title,
+      artist,
+      imageUrl,
+      metadataUrl,
+   {
+     from: web3.eth.coinbase,
+     data: WORKBIN,
+     gas: '4700000'
+   }, function (e, contract){
+     console.log(contract.address);
+      //console.log(web3.eth.getBlock("latest").gasLimit);
+      // console.log(work);
+      if(contract.address){
+        var _logAddress = LOGADDR;
+        var _workAddress = contract.address;
+        var _playPrice = playPrice;
+        var _buyPrice = buyPrice;
+        var _resourceUrl = imageUrl;
+        var _metadataUrl = metadataUrl;
+        var _isParent = isP_arr;
+        var _hasParent = hasP_arr;
+        var _parents = parents;
+        var _contributors = contributors;
+        var _shares = shares;
+        var _benefitTypes = benefitTypes_arr;
+        var args = [];
+        args.push(_logAddress);
+        args.push(_workAddress);
+        args.push(_playPrice);
+        args.push(_buyPrice);
+        args.push(_resourceUrl);
+        args.push(_metadataUrl);
+        args.push(_isParent);
+        args.push(_hasParent);
+        args.push(_parents);
+        args.push(_contributors);
+        args.push(_shares);
+        args.push(_benefitTypes);
+        // console.log(args);
+        // var arr = args.concat(_logAddress,_workAddress,_perPlay,_perBuy,_resourceUrl,_metadataUrl,_royalties,_royaltyAmounts,_contributors,_contributorShares);
+        var licenseContract = web3.eth.contract(LICENSEABI);
+        var contractData = licenseContract.new.getData.apply(licenseContract, args.concat({
+            from: web3.eth.coinbase, data: LICENSEBIN
+        }))
+
+        var gasEstimate = web3.eth.estimateGas({data: contractData});
+        console.log(gasEstimate);
+        console.log(args);
+        var license = licenseContract.new(
+          _logAddress,
+          _workAddress,
+          _playPrice,
+          _buyPrice,
+          _resourceUrl,
+          _metadataUrl,
+          _isParent,
+          _hasParent,
+          _parents,
+          _contributors,
+          _shares,
+          _benefitTypes,
+           {
+             from: web3.eth.coinbase,
+             data: LICENSEBIN,
+             gas: gasEstimate * 2
+           }, function (e, contractLicense){
+            if (contractLicense.address) {
+              console.log(11);
+              console.log(contractLicense.address);
+              //0x9d012fafa349a02cb587e559eed283e97a967fb4
+
+              res.send({success:1});
+            }else{
+              console.log(22);
+            }
+         })
+         return;
+      }
+  });
+});
+
+app.post('/login',function(req,res){
+	console.log(req.body)
+	var _body = req.body,
+		login_arr = [
+			{
+				'userName' : 'admin',
+				'password' : 123
+			},
+			{
+				'userName' : 'haiyun',
+				'password' : 7115
+			}
+		],
+		flag = false;
+	for(var i=0,len=login_arr.length;i<len;i++){
+		var element = login_arr[i];
+		if(element.userName === _body.userName && element.password == _body.password){
+			flag = true;
+			break;
 		}
-  	)
+	}
+
+	if(flag){
+		res.send({success : 1});
+	}else{
+		res.send({success : 0,data:'用户名或密码错误！'});
+	}
+});
+
+
+var server = app.listen(3002, function () {
+
+  var host = server.address().address
+  var port = server.address().port
+
+  console.log("http://%s:%s", host, port);
+
 })
-
-
-/*web3起链子 end*/
-// res.send({success:1,data:_arr});//res.send后台回应前台的数据，传入前台
-app.post('/aaa',function(req,res){//req是要去取得前台的请求，res是返回给前台的数据
-	var _arr = [];
-	var classification = {};
-	if(req.body.status == 1){
-		for(key in json){
-			_arr.push({key:key,value:json[key].name});
-		}
-		// console.log(_arr);[ { key: 'fresh', value: '生鲜部' },
-		// 		  { key: 'foods', value: '食品部' },
-		// 		  { key: 'nonFoods', value: '非食品部' } ]
-
-		res.send({success:1,data:_arr});
-	}
-	if(req.body.status == 2){
-		_arr = [];
-		var group = json[req.body.id].group;
-		for(key in group){
-			_arr.push({key:key,value:group[key].name});
-		}
-		// console.log(group);
-		res.send({success:1,data:_arr});
-	}
-	if(req.body.status == 3){
-		classification = json[req.body.super_id].group[req.body.id].classification;
-		res.send({success:1,data:classification});
-	}
-})
-
-
-//XML调用
-/*app.post('/bbb',function(req,res){
-	//res.send({data:xml})
-})*/
-
-
-
-
-
-
-
-
-/*app.post('/aaa',function(req,res){
-	// console.log(req.body.id);//{}
-	var _arr = [],
-	      _obj;
-
-	if(req.body.status == 1){
-		for(key in json){
-			_arr.push({key:key,value:json[key].name})
-		}
-		res.send({success:1,data:_arr})
-	}
-	if(req.body.status == 2){
-		_obj = json[req.body.id]['group'];
-		_arr = [];
-		for(key in _obj){
-			_arr.push({key:key,value:_obj[key].name})
-		}
-
-		res.send({success:1,data:_arr})
-	}
-	if(req.body.status == 3){
-		_obj = json[req.body.super_id]['group'][req.body.id]['classification'];
-		res.send({success:1,data:_obj})
-	}
-})*/

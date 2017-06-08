@@ -4,14 +4,14 @@
 		<meta charset="UTF-8">
 		<title></title>
 		<link rel="stylesheet" type="text/css" href="../styles/css/bootstrap.min.css">
-  		<link rel="stylesheet" type="text/css" href="../styles/css/styles.css">	
+  		<link rel="stylesheet" type="text/css" href="../styles/css/styles.css">
 	</head>
 	<body>
 		<div class="container accountDetails index_pad_top15">
 			<h3>账户明细</h3>
 		      	<div class="table_border">
 				<table class="table  table-condensed">
-				  <caption>账户余额&nbsp;300元</caption>
+				  <caption>账户余额&nbsp;<span class="balance"></span>ether</caption>
 				  <thead>
 				    <tr>
 				      <th>账单时间</th>
@@ -23,102 +23,77 @@
 				      <th>交易类型</th>
 				    </tr>
 				  </thead>
-				  <tbody>
-				    <tr>
-				      <td>2017-4-9&nbsp;18:00</td>
-				      <td>收入</td>
-				      <td>10</td>
-				      <td>夜空中最闪亮的星</td>
-				      <td>XXXX</td>
-				      <td>作曲</td>
-				      <td>版权</td>
-				    </tr>
-				   <tr>
-				      <td>2017-4-9&nbsp;18:00</td>
-				      <td>收入</td>
-				      <td>10</td>
-				      <td>夜空中最闪亮的星</td>
-				      <td>XXXX</td>
-				      <td>作曲</td>
-				      <td>版权</td>
-				    </tr>
-				    <tr>
-				      <td>2017-4-9&nbsp;18:00</td>
-				      <td>收入</td>
-				      <td>10</td>
-				      <td>夜空中最闪亮的星</td>
-				      <td>XXXX</td>
-				      <td>作曲</td>
-				      <td>版权</td>
-				    </tr>
-				    <tr>
-				      <td>2017-4-9&nbsp;18:00</td>
-				      <td>收入</td>
-				      <td>10</td>
-				      <td>夜空中最闪亮的星</td>
-				      <td>XXXX</td>
-				      <td>作曲</td>
-				      <td>版权</td>
-				    </tr>
-				    <tr>
-				      <td>2017-4-9&nbsp;18:00</td>
-				      <td>收入</td>
-				      <td>10</td>
-				      <td>夜空中最闪亮的星</td>
-				      <td>XXXX</td>
-				      <td>作曲</td>
-				      <td>版权</td>
-				    </tr>
-				    <tr>
-				      <td>2017-4-9&nbsp;18:00</td>
-				      <td>收入</td>
-				      <td>10</td>
-				      <td>夜空中最闪亮的星</td>
-				      <td>XXXX</td>
-				      <td>作曲</td>
-				      <td>版权</td>
-				    </tr>
-				    <tr>
-				      <td>2017-4-9&nbsp;18:00</td>
-				      <td>收入</td>
-				      <td>10</td>
-				      <td>夜空中最闪亮的星</td>
-				      <td>XXXX</td>
-				      <td>作曲</td>
-				      <td>版权</td>
-				    </tr>
-				    <tr>
-				      <td>2017-4-9&nbsp;18:00</td>
-				      <td>收入</td>
-				      <td>10</td>
-				      <td>夜空中最闪亮的星</td>
-				      <td>XXXX</td>
-				      <td>作曲</td>
-				      <td>版权</td>
-				    </tr>
-				    <tr>
-				      <td>2017-4-9&nbsp;18:00</td>
-				      <td>收入</td>
-				      <td>10</td>
-				      <td>夜空中最闪亮的星</td>
-				      <td>XXXX</td>
-				      <td>作曲</td>
-				      <td>版权</td>
-				    </tr>
-				    <tr>
-				      <td>2017-4-9&nbsp;18:00</td>
-				      <td>收入</td>
-				      <td>10</td>
-				      <td>夜空中最闪亮的星</td>
-				      <td>XXXX</td>
-				      <td>作曲</td>
-				      <td>版权</td>
-				    </tr>
-				    
+				  <tbody class="Otbody">
+
 				  </tbody>
 				</table>
 
 				</div>
 		</div>
+		<script type="text/javascript" src="../js/libs/jquery-3.2.0.min.js"></script>
+		<script>
+			var arr = [];
+			var _arr = [];
+			var Obalance ;
+			;!function(){
+				function changeByReg(num){
+				 num = num || 1493103810;
+				 var newDate = new Date();
+				 newDate.setTime(num * 1000);
+				 var str = newDate.toLocaleString()
+				 var reg_a = /[\u4e00-\u9fa5]|[/]/g
+
+				 var newstr = str.replace(reg_a,function(t){
+				 if(t === '/'){
+				 return '-';
+				 }
+				 if(/[\u4e00-\u9fa5]/.test(t)){
+				 return '';
+				 }
+				 })
+				 return newstr
+
+			 }
+			 //账户明细支出
+				$.ajax({
+					url:"/accountDetailList",
+					type:"POST",
+					timeout : 300000,
+					success: function(res){
+						console.log("111")
+						var Odata = res.data;console.log(Odata)
+						 arr = [];
+						  for(var i in Odata){
+						// 	console.log(Odata[i]);
+						 	var Obalance = Odata[0].balance;
+
+						 	arr.push("<tr><td>"+changeByReg(Odata[i].nowTime)+"</td><td>支出</td><td>"+Odata[i].money+"</td><td>"+Odata[i].work+"</td><td>"+Odata[i].buyer+"</td><td>--</td><td>"+Odata[i].purpose+"</td></tr>")
+						 }
+						  $('.Otbody').append(arr.join(''));
+						 $('.balance').text(parseInt(Obalance).toFixed(2));
+						 $.ajax({
+		 					url:"/accountDetailList1",
+		 					type:"POST",
+		 					timeout : 300000,
+		 					success: function(res){
+		 						var _Odata = res.data;
+		 						 _arr = [];
+								// var newArr = Odata.concat(_Odata)
+								// console.log(newArr,_Odata)
+		 						for(var i in _Odata){
+		 							//console.log(newArr[i]);
+		 							_arr.push("<tr><td>"+changeByReg(_Odata[i].nowTime)+"</td><td>收入</td><td>"+_Odata[i].money+"</td><td>"+_Odata[i].work+"</td><td>"+_Odata[i].sharer+"</td><td>作曲</td><td>--</td></tr>")
+		 						}
+								//console.log(arr)
+		 						 $('.Otbody').append(_arr.join(''));
+
+		 					}
+		 				});
+					}
+				});
+				//账户明细收入
+
+			}();
+		</script>
 	</body>
 </html>

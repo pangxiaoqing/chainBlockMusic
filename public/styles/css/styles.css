@@ -122,10 +122,9 @@ b{font-weight:normal;}
   background-color: #f6f6f6;
 }
 .index_ellipsis{
-	/*width: 100px;*/
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 /* index page end */
 /*authSongs认证歌曲,purchaseRecord购买记录---css开始*/
@@ -136,6 +135,7 @@ b{font-weight:normal;}
 .tablewrap{margin-top: 20px;}
 .tablewrap .table th{background-color: #f0f0f0;text-align: center;border:none;padding-top: 15px;padding-bottom: 15px;font-size: 14px;}
 .tablewrap .table td{border:none;border-bottom: 1px solid #f2f2f2; text-align: center;padding-top: 15px;padding-bottom: 14px;font-size: 12px;}
+.tablewrap .authsongCheck{cursor: pointer;}
 /*authSongs认证歌曲,purchaseRecord购买记录---css结束*/
 
 /*+++++++++++accountCenter开始++++++++++++++++++*/
@@ -284,7 +284,7 @@ caption{
     width:100%;
     display: none;
     border: 1px solid #ccc;
-    max-height: 380px;
+    max-height: 450px;
 }
 .on{
     display:block;
@@ -302,6 +302,14 @@ caption{
 .bdcast_table>tbody>.bacast_table_tr td{
   border-top: 1px solid #ccc;
 }
+.bdcast_table>tbody>tr>td:nth-child(1)>span{
+  display: inline-block;
+  width: 100px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .bdcast_control_bar{
 	width: 100%;
 	height: auto;
@@ -318,16 +326,15 @@ caption{
     cursor: pointer;
     color: #ed061a;
     font-size: 35px;
-}
-.bdcast_stop span:first-child{
-    top:-5px;
-    margin-right:15px;
+    background-color: #ed061a;
+    border-radius: 50%;
+    color: white;
     font-size: 20px;
+    padding: 8px;
+    margin-right: 10px;
 }
-.bdcast_stop span:last-child{
-    top:-5px;
-    margin-left:15px;
-    font-size: 20px;
+.bdcast_stop span:hover{
+
 }
 .bdcast_bar{
     height:40px;
@@ -376,19 +383,6 @@ caption{
     line-height: 40px;
   }
   .bdcast_stop span{
-      cursor: pointer;
-      color: #ed061a;
-      font-size: 22px;
-      top: 4px;
-  }
-  .bdcast_stop span:first-child{
-      top:0px;
-      margin-right: 0px;
-      font-size: 16px;
-  }
-  .bdcast_stop span:last-child{
-      top:0px;
-      margin-left: 0px;
       font-size: 16px;
   }
   .bdcast_time{
@@ -504,6 +498,7 @@ caption{
 	border-top:1px solid #ddd;
 	padding-top:15px;
 	overflow:hidden;
+  text-align: center;
 }
 .tapWin .dialog-footer a{
 	display:block;
@@ -525,15 +520,46 @@ caption{
 	margin-left:2%;
 	margin-right:23%;
 }
-
-
-
-
-
-
-
-
-
-
-
-
+/*认证明细*/
+.aBtn{
+  display:inline-block;
+  background:red;color:#fff;
+  width:100px;text-align:center;
+  height:32px;line-height:32px;
+  cursor:pointer;
+}
+a.aBtn:hover{
+  color:#fff;
+}
+#table_view tr td.subTd span.sub{
+  border: 2px solid red;
+  border-radius: 50%;
+  width: 26px;
+  color: red;
+  font-size: 40px;
+  height: 26px;
+  line-height: 16px;
+  cursor: pointer;
+  float: left;
+}
+#table_view dl .ddStyle{
+  /*margin:0 40px;*/
+  margin-right:50px;
+}
+#table_view dl dd:last-child{
+  border: 2px solid red;
+  border-radius: 50%;
+  width: 26px;
+  color: red;
+  font-size: 40px;
+  height: 26px;
+  line-height: 16px;
+  cursor: pointer;
+}
+#table_view dl .line{
+  width:60px;
+  height:42px;
+  margin-top:-21px;
+  border-left:1px solid #ddd;
+  border-bottom:1px solid #ddd
+}
